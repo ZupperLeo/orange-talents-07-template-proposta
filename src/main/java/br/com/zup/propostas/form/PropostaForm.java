@@ -1,5 +1,6 @@
 package br.com.zup.propostas.form;
 
+import br.com.zup.propostas.config.validators.CPFCNPJValidator;
 import br.com.zup.propostas.model.Proposta;
 
 import javax.validation.constraints.Email;
@@ -10,6 +11,7 @@ import java.math.BigDecimal;
 
 public class PropostaForm {
 
+    @CPFCNPJValidator
     private String cpf;
     @Email
     @NotBlank
