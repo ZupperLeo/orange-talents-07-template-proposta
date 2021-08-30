@@ -11,8 +11,9 @@ import java.math.BigDecimal;
 
 public class PropostaForm {
 
-    @CPFCNPJValidator
-    private String cpf;
+    @CPFCNPJValidator(domainClass = Proposta.class, fieldName = "documento")
+    @NotBlank
+    private String documento;
     @Email
     @NotBlank
     private String email;
@@ -24,16 +25,36 @@ public class PropostaForm {
     @Positive
     private BigDecimal salario;
 
-    public PropostaForm(String cpf, @NotBlank @Email String email, @NotBlank String nome,
+    public PropostaForm(@NotBlank String documento, @NotBlank @Email String email, @NotBlank String nome,
                         @NotBlank String endereco, @NotNull @Positive BigDecimal salario) {
-        this.cpf = cpf;
+        this.documento = documento;
         this.email = email;
         this.nome = nome;
         this.endereco = endereco;
         this.salario = salario;
     }
 
+    public String getDocumento() {
+        return documento;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public String getEndereco() {
+        return endereco;
+    }
+
+    public BigDecimal getSalario() {
+        return salario;
+    }
+
     public Proposta toModel() {
-        return new Proposta(this.cpf, this.email, this.nome, this.endereco, this.salario);
+        return new Proposta(this.documento, this.email, this.nome, this.endereco, this.salario);
     }
 }

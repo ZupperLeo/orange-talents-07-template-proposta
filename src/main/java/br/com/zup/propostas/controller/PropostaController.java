@@ -14,6 +14,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import java.net.URI;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/propostas")
@@ -24,7 +25,13 @@ public class PropostaController {
 
     @PostMapping
     @Transactional
-    public ResponseEntity<?> novaProposta(@Valid @RequestBody PropostaForm form, UriComponentsBuilder uriBuilder) {
+    public ResponseEntity<URI> criar(@Valid @RequestBody PropostaForm form, UriComponentsBuilder uriBuilder) {
+        Optional<Proposta> verifica = repository.findByDocumento(form.getDocumento());
+
+        if(verifica.isPresent()) {
+            return ResponseEntity.status(422).build();
+        }
+
         Proposta proposta = form.toModel();
         repository.save(proposta);
 

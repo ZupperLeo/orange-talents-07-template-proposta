@@ -17,7 +17,7 @@ public class Proposta {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String cpf;
+    private @NotBlank String documento;
     private @Email @NotBlank String email;
     private @NotBlank String nome;
     private @NotBlank String endereco;
@@ -27,9 +27,9 @@ public class Proposta {
     public Proposta() {
     }
 
-    public Proposta(String cpf, @Email @NotBlank String email, @NotBlank String nome,
+    public Proposta(@NotBlank String documento, @Email @NotBlank String email, @NotBlank String nome,
                     @NotBlank String endereco, @NotNull @Positive BigDecimal salario) {
-        this.cpf = cpf;
+        this.documento = documento;
         this.email = email;
         this.nome = nome;
         this.endereco = endereco;

@@ -14,7 +14,7 @@ import java.lang.annotation.*;
 @CNPJ
 @ConstraintComposition(CompositionType.OR)
 @ReportAsSingleViolation
-@Constraint(validatedBy = { })
+@Constraint(validatedBy = { ExistDocumentValidator.class })
 @Documented
 @Target({ ElementType.FIELD })
 @Retention(RetentionPolicy.RUNTIME)
@@ -23,4 +23,6 @@ public @interface CPFCNPJValidator {
     String message() default "CPF ou CNPJ invalido!";
     Class<?>[] groups() default { };
     Class<? extends Payload>[] payload() default { };
+    String fieldName();
+    Class<?> domainClass();
 }
