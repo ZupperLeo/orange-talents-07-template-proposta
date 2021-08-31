@@ -1,4 +1,4 @@
-package br.com.zup.propostas.form;
+package br.com.zup.propostas.dto;
 
 import br.com.zup.propostas.config.validators.CPFCNPJValidator;
 import br.com.zup.propostas.model.Proposta;
