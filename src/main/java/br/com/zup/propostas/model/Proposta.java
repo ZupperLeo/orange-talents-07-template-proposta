@@ -21,6 +21,8 @@ public class Proposta {
     private @NotNull @Positive BigDecimal salario;
     @Enumerated(EnumType.STRING)
     private StatusProposta status;
+    @OneToOne
+    private Cartao cartao;
 
     @Deprecated
     public Proposta() {
@@ -62,6 +64,10 @@ public class Proposta {
 
     public StatusProposta getStatus() {
         return status;
+    }
+
+    public void setCartao(Cartao cartao) {
+        this.cartao = cartao;
     }
 
     public void status(ResultadoSolicitacao resultado) {

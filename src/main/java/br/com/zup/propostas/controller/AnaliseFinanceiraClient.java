@@ -11,7 +11,7 @@ import javax.validation.Valid;
 /*Nas versões mais recentes do Feign,
  precisamos passar além da url, um nome para nosso cliente.*/
 @FeignClient(url = "http://localhost:9999", name = "solicitacao")
-public interface AnaliseFinanceiraController {
+public interface AnaliseFinanceiraClient {
 
     @PostMapping("/api/solicitacao")
     AnaliseApiDTO consulta(@Valid @RequestBody AnaliseApiForm form);

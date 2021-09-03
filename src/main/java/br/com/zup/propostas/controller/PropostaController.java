@@ -27,7 +27,7 @@ public class PropostaController {
     private PropostaRepository repository;
     private final Tracer tracer;
     @Autowired
-    private AnaliseFinanceiraController analise;
+    private AnaliseFinanceiraClient analise;
 
     public PropostaController(PropostaRepository repository, Tracer tracer) {
         this.repository = repository;
