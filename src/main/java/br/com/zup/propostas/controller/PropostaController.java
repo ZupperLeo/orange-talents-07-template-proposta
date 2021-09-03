@@ -2,6 +2,7 @@ package br.com.zup.propostas.controller;
 
 import br.com.zup.propostas.dto.AnaliseApiDTO;
 import br.com.zup.propostas.dto.AnaliseApiForm;
+import br.com.zup.propostas.dto.PropostaDTO;
 import br.com.zup.propostas.dto.PropostaForm;
 import br.com.zup.propostas.model.Proposta;
 import br.com.zup.propostas.repository.PropostaRepository;
@@ -9,10 +10,7 @@ import io.opentracing.Span;
 import io.opentracing.Tracer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.transaction.Transactional;
@@ -59,5 +57,18 @@ public class PropostaController {
         URI uri = uriBuilder.path("/propostas/{id}").buildAndExpand(proposta.getId()).toUri();
 
         return ResponseEntity.status(201).body(uri);
+    }
+
+    @GetMapping(value = "/{documento}")
+    @Transactional
+    public ResponseEntity<?> buscar(@PathVariable String documento) {
+        Optional<Proposta> verifica = repository.findByDocumento(documento);
+
+        if(verifica.isPresent()) {
+            PropostaDTO dto = new PropostaDTO(verifica.get());
+            return  ResponseEntity.ok().body(dto.toString());
+        }
+
+        return ResponseEntity.notFound().build();
     }
 }
