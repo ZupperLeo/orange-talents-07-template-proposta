@@ -25,4 +25,8 @@ public class Cartao {
         this.titular = titular;
         this.emitidoEm = emitidoEm;
     }
+
+    public String getNumCartao() {
+        return numCartao;
+    }
 }

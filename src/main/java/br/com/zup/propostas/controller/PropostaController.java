@@ -61,7 +61,7 @@ public class PropostaController {
 
     @GetMapping(value = "/{documento}")
     @Transactional
-    public ResponseEntity<?> buscar(@PathVariable String documento) {
+    public ResponseEntity<String> buscar(@PathVariable String documento) {
         Optional<Proposta> verifica = repository.findByDocumento(documento);
 
         if(verifica.isPresent()) {
