@@ -3,7 +3,6 @@ package br.com.zup.propostas.config.service;
 import org.apache.tomcat.util.codec.binary.Base64;
 
 import javax.validation.constraints.NotBlank;
-//import java.util.Base64;
 
 public class PrintEncoded {
 
