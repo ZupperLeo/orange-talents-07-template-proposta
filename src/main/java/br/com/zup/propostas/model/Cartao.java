@@ -1,10 +1,9 @@
 package br.com.zup.propostas.model;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
 
 @Entity
 public class Cartao {
@@ -15,6 +14,8 @@ public class Cartao {
     private @NotBlank String numCartao;
     private @NotBlank String titular;
     private @NotBlank String emitidoEm;
+    @Enumerated(EnumType.STRING)
+    private @NotNull StatusCartao status = StatusCartao.ATIVO;
 
     @Deprecated
     public Cartao() {
@@ -28,5 +29,16 @@ public class Cartao {
 
     public String getNumCartao() {
         return numCartao;
+    }
+
+    public StatusCartao getStatus() {
+        return status;
+    }
+
+    /**
+     * Metodo responsavel por realizar o bloqueio do cartao
+     * */
+    protected void bloquear() {
+        this.status = StatusCartao.BLOQUEADO;
     }
 }
