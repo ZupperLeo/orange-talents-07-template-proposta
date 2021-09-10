@@ -1,6 +1,7 @@
 package br.com.zup.propostas.controller;
 
 import br.com.zup.propostas.dto.BiometriaForm;
+import br.com.zup.propostas.dto.BloqueiaApiForm;
 import br.com.zup.propostas.model.Biometria;
 import br.com.zup.propostas.model.Bloqueia;
 import br.com.zup.propostas.model.Cartao;
@@ -8,6 +9,7 @@ import br.com.zup.propostas.model.StatusCartao;
 import br.com.zup.propostas.repository.BiometriaRepository;
 import br.com.zup.propostas.repository.BloqueiaRepository;
 import br.com.zup.propostas.repository.CartaoRepository;
+import feign.FeignException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +20,6 @@ import javax.transaction.Transactional;
 import javax.validation.Valid;
 import java.net.URI;
 import java.util.Optional;
-import java.util.Properties;
 
 @RestController
 @RequestMapping("/cartoes")
@@ -30,6 +31,8 @@ public class CartaoController {
     private BiometriaRepository biometriaRepository;
     @Autowired
     private BloqueiaRepository bloqueiaRepository;
+    @Autowired
+    private CartoesClient client;
 
     @PostMapping(value = "/{numCartao}/biometria")
     @Transactional
@@ -65,15 +68,19 @@ public class CartaoController {
         }
 
         Cartao cartao = verifica.get();
-        System.out.println(cartao.getStatus());//TODO retirar esssa linha
 
         if(cartao.getStatus() == StatusCartao.BLOQUEADO) {
             return ResponseEntity.status(422).build();
         }
 
-        Bloqueia bloqueia = new Bloqueia(cartao, ipTitular, userAgent);
-        System.out.println(cartao.getStatus());//TODO retirar esssa linha
+        try {
+            BloqueiaApiForm apiForm = new BloqueiaApiForm("proposta");
+            client.bloquear(numCartao, apiForm);
+        } catch (FeignException e) {
+            return ResponseEntity.status(500).body(e.getMessage());
+        }
 
+        Bloqueia bloqueia = new Bloqueia(cartao, ipTitular, userAgent);
         bloqueiaRepository.save(bloqueia);
         cardRepository.save(cartao);
 
