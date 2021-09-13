@@ -1,8 +1,6 @@
 package br.com.zup.propostas.controller;
 
-import br.com.zup.propostas.dto.BloqueiaApiDTO;
-import br.com.zup.propostas.dto.BloqueiaApiForm;
-import br.com.zup.propostas.dto.CartaoApiDTO;
+import br.com.zup.propostas.dto.*;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,5 +12,8 @@ public interface CartoesClient {
 
     @PostMapping("/api/cartoes/{id}/bloqueios")
     BloqueiaApiDTO bloquear(@PathVariable String id, @RequestBody BloqueiaApiForm form);
+
+    @PostMapping("/api/cartoes/{id}/avisos")
+    AvisoViagemApiDTO avisar(@PathVariable String id, @RequestBody AvisoViagemForm form);
 
 }

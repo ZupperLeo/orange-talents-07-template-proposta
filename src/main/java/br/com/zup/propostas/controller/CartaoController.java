@@ -40,7 +40,7 @@ public class CartaoController {
     public ResponseEntity<URI> cadastrar(@PathVariable String numCartao, @RequestBody @Valid BiometriaForm form, UriComponentsBuilder builder) {
         Optional<Cartao> buscaCartao = cardRepository.findByNumCartao(numCartao);
 
-        if(buscaCartao.isEmpty()) {
+        if (buscaCartao.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
@@ -60,17 +60,17 @@ public class CartaoController {
         String ipTitular = request.getRemoteHost();
         String userAgent = request.getHeader("User-Agent");
 
-        if(ipTitular == null) {
+        if (ipTitular == null) {
             ipTitular = request.getRemoteAddr();
         }
 
-        if(buscaCartao.isEmpty()) {
+        if (buscaCartao.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
         Cartao cartao = buscaCartao.get();
 
-        if(cartao.getStatus() == StatusCartao.BLOQUEADO) {
+        if (cartao.getStatus() == StatusCartao.BLOQUEADO) {
             return ResponseEntity.status(422).build();
         }
 
@@ -97,18 +97,24 @@ public class CartaoController {
         String ipTitular = request.getRemoteHost();
         String userAgent = request.getHeader("User-Agent");
 
-        if(ipTitular == null) {
+        if (ipTitular == null) {
             ipTitular = request.getRemoteAddr();
         }
 
-        if(buscaCartao.isEmpty()) {
+        if (buscaCartao.isEmpty()) {
             return ResponseEntity.status(404).build();
         }
 
         Cartao cartao = buscaCartao.get();
 
-        if(cartao.getStatus() == StatusCartao.BLOQUEADO){
+        if (cartao.getStatus() == StatusCartao.BLOQUEADO) {
             return ResponseEntity.status(400).build();
+        }
+
+        try {
+            client.avisar(numCartao, form);
+        } catch (FeignException e) {
+            return ResponseEntity.status(500).body(e.getMessage());
         }
 
         AvisoViagem avisoViagem = form.toModel(cartao, ipTitular, userAgent);
