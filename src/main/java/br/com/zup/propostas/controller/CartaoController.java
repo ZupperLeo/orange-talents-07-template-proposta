@@ -1,11 +1,10 @@
 package br.com.zup.propostas.controller;
 
+import br.com.zup.propostas.dto.AvisoViagemForm;
 import br.com.zup.propostas.dto.BiometriaForm;
 import br.com.zup.propostas.dto.BloqueiaApiForm;
-import br.com.zup.propostas.model.Biometria;
-import br.com.zup.propostas.model.Bloqueia;
-import br.com.zup.propostas.model.Cartao;
-import br.com.zup.propostas.model.StatusCartao;
+import br.com.zup.propostas.model.*;
+import br.com.zup.propostas.repository.AvisoViagemRepository;
 import br.com.zup.propostas.repository.BiometriaRepository;
 import br.com.zup.propostas.repository.BloqueiaRepository;
 import br.com.zup.propostas.repository.CartaoRepository;
@@ -32,18 +31,20 @@ public class CartaoController {
     @Autowired
     private BloqueiaRepository bloqueiaRepository;
     @Autowired
+    private AvisoViagemRepository avisoViagemRepository;
+    @Autowired
     private CartoesClient client;
 
     @PostMapping(value = "/{numCartao}/biometria")
     @Transactional
     public ResponseEntity<URI> cadastrar(@PathVariable String numCartao, @RequestBody @Valid BiometriaForm form, UriComponentsBuilder builder) {
-        Optional<Cartao> verifica = cardRepository.findByNumCartao(numCartao);
+        Optional<Cartao> buscaCartao = cardRepository.findByNumCartao(numCartao);
 
-        if(verifica.isEmpty()) {
+        if(buscaCartao.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
-        Cartao cartao = verifica.get();
+        Cartao cartao = buscaCartao.get();
         Biometria biometria = form.toModel(cartao);
         biometriaRepository.save(biometria);
 
@@ -54,7 +55,7 @@ public class CartaoController {
     @PostMapping(value = "/{numCartao}/bloquear")
     @Transactional
     public ResponseEntity<?> bloquear(HttpServletRequest request, @PathVariable String numCartao) {
-        Optional<Cartao> verifica = cardRepository.findByNumCartao(numCartao);
+        Optional<Cartao> buscaCartao = cardRepository.findByNumCartao(numCartao);
 
         String ipTitular = request.getRemoteHost();
         String userAgent = request.getHeader("User-Agent");
@@ -63,11 +64,11 @@ public class CartaoController {
             ipTitular = request.getRemoteAddr();
         }
 
-        if(verifica.isEmpty()) {
+        if(buscaCartao.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
-        Cartao cartao = verifica.get();
+        Cartao cartao = buscaCartao.get();
 
         if(cartao.getStatus() == StatusCartao.BLOQUEADO) {
             return ResponseEntity.status(422).build();
@@ -86,4 +87,42 @@ public class CartaoController {
 
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/{numCartao}/aviso-viagem")
+    @Transactional
+    public ResponseEntity<?> avisaViagem(HttpServletRequest request, @PathVariable String numCartao,
+                                         @RequestBody @Valid AvisoViagemForm form) {
+        Optional<Cartao> buscaCartao = cardRepository.findByNumCartao(numCartao);
+
+        String ipTitular = request.getRemoteHost();
+        String userAgent = request.getHeader("User-Agent");
+
+        if(ipTitular == null) {
+            ipTitular = request.getRemoteAddr();
+        }
+
+        if(buscaCartao.isEmpty()) {
+            return ResponseEntity.status(404).build();
+        }
+
+        Cartao cartao = buscaCartao.get();
+
+        if(cartao.getStatus() == StatusCartao.BLOQUEADO){
+            return ResponseEntity.status(400).build();
+        }
+
+        AvisoViagem avisoViagem = form.toModel(cartao, ipTitular, userAgent);
+
+        avisoViagemRepository.save(avisoViagem);
+        cardRepository.save(cartao);
+
+        return ResponseEntity.status(200).build();
+    }
 }
+
+
+
+
+
+
+
