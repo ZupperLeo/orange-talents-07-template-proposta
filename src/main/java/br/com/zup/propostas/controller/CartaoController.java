@@ -1,17 +1,13 @@
 package br.com.zup.propostas.controller;
 
-import br.com.zup.propostas.dto.AvisoViagemForm;
-import br.com.zup.propostas.dto.BiometriaForm;
-import br.com.zup.propostas.dto.BloqueiaApiForm;
+import br.com.zup.propostas.dto.*;
 import br.com.zup.propostas.model.*;
-import br.com.zup.propostas.repository.AvisoViagemRepository;
-import br.com.zup.propostas.repository.BiometriaRepository;
-import br.com.zup.propostas.repository.BloqueiaRepository;
-import br.com.zup.propostas.repository.CartaoRepository;
+import br.com.zup.propostas.repository.*;
 import feign.FeignException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.servlet.http.HttpServletRequest;
@@ -19,6 +15,11 @@ import javax.transaction.Transactional;
 import javax.validation.Valid;
 import java.net.URI;
 import java.util.Optional;
+import java.util.Set;
+
+/*NOTA:
+ * estou incomodado com o tamanho que esse controller estah ficando, pretendo refatora-lo futuramente
+ * se eu irei apenas utilizar o metodo save da interface, nao seria melhor utilizar o EntityManager?*/
 
 @RestController
 @RequestMapping("/cartoes")
@@ -32,6 +33,8 @@ public class CartaoController {
     private BloqueiaRepository bloqueiaRepository;
     @Autowired
     private AvisoViagemRepository avisoViagemRepository;
+    @Autowired
+    private CarteiraRepository carteiraRepository;
     @Autowired
     private CartoesClient client;
 
@@ -123,6 +126,47 @@ public class CartaoController {
         cardRepository.save(cartao);
 
         return ResponseEntity.status(200).build();
+    }
+
+    @PostMapping("/{numCartao}/associar")
+    @Transactional
+    public ResponseEntity<?> associarCarteira(@PathVariable String numCartao, @RequestBody @Valid CarteiraForm form,
+                                              UriComponentsBuilder componentsBuilder) {
+        Optional<Cartao> buscaCartao = cardRepository.findByNumCartao(numCartao);
+
+        if (buscaCartao.isEmpty()) {
+            return ResponseEntity.status(404).build();
+        }
+
+        Cartao cartao = buscaCartao.get();
+        Set<Carteira> carteiraList = carteiraRepository
+                .findByResultadoAndCartaoNumCartao(ResultadoCarteira.ASSOCIADA, numCartao);
+
+        for (Carteira carteiraEncontrada : carteiraList) {
+            if (carteiraEncontrada.getTipoCarteira() == form.getCarteira()) {
+                return ResponseEntity.status(422).build();
+            }
+        }
+
+        if (cartao.getStatus() == StatusCartao.BLOQUEADO) {
+            return ResponseEntity.status(400).build();
+        }
+
+        Carteira carteira = form.toModel(cartao);
+
+        cardRepository.save(cartao);
+        carteiraRepository.save(carteira);
+
+        try {
+            CarteiraApiForm apiForm = new CarteiraApiForm(form.getEmail(), form.getCarteira());
+            client.associar(numCartao, form);
+        } catch (FeignException e) {
+            return ResponseEntity.status(500).body(e.getMessage());
+        }
+
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(carteira.getId()).toUri();
+
+        return ResponseEntity.created(uri).build();
     }
 }
 

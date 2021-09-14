@@ -16,4 +16,6 @@ public interface CartoesClient {
     @PostMapping("/api/cartoes/{id}/avisos")
     AvisoViagemApiDTO avisar(@PathVariable String id, @RequestBody AvisoViagemForm form);
 
+    @PostMapping("/api/cartoes/{id}/carteiras")
+    CarteiraApiDTO associar(@PathVariable String id, @RequestBody CarteiraForm form);
 }
